@@ -39,8 +39,6 @@ jobs:
         key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./internal/tools/**') }}
     - name: Run linters
       run: make dependabot-check license-check lint
-    - name: Build
-      run: make examples build
     - name: Check clean repository
       run: make check-clean-work-tree
 
