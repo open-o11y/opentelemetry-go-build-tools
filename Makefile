@@ -118,7 +118,7 @@ test-coverage:
 	sed -i.bak -e '2,$$ { /^mode: /d; }' coverage.txt
 
 .PHONY: lint
-lint: misspell lint-modules | $(GOLANGCI_LINT)
+lint: misspell | $(GOLANGCI_LINT)
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "golangci-lint in $${dir}"; \
 	  (cd "$${dir}" && \
@@ -129,16 +129,6 @@ lint: misspell lint-modules | $(GOLANGCI_LINT)
 .PHONY: misspell
 misspell: | $(MISSPELL)
 	$(MISSPELL) -w $(ALL_DOCS)
-
-.PHONY: lint-modules
-lint-modules: | $(CROSSLINK)
-	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "$(GO) mod tidy in $${dir}"; \
-	  (cd "$${dir}" && \
-	    $(GO) mod tidy); \
-	done
-	echo "cross-linking all go modules"
-	$(CROSSLINK)
 
 .PHONY: license-check
 license-check:
