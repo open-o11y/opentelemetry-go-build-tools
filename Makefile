@@ -34,14 +34,10 @@ TOOLS = $(CURDIR)/.tools
 $(TOOLS):
 	@mkdir -p $@
 $(TOOLS)/%: | $(TOOLS)
-	cd $(TOOLS_MOD_DIR) && \
 	$(GO) build -o $@ $(PACKAGE)
 
 SEMCONVGEN = $(TOOLS)/semconv-gen
 $(TOOLS)/semconv-gen: PACKAGE=go.opentelemetry.io/otel/$(TOOLS_MOD_DIR)/semconv-gen
-
-CROSSLINK = $(TOOLS)/crosslink
-$(TOOLS)/crosslink: PACKAGE=go.opentelemetry.io/otel/$(TOOLS_MOD_DIR)/crosslink
 
 GOLANGCI_LINT = $(TOOLS)/golangci-lint
 $(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
@@ -55,7 +51,7 @@ $(TOOLS)/stringer: PACKAGE=golang.org/x/tools/cmd/stringer
 $(TOOLS)/gojq: PACKAGE=github.com/itchyny/gojq/cmd/gojq
 
 .PHONY: tools
-tools: $(CROSSLINK) $(GOLANGCI_LINT) $(MISSPELL) $(STRINGER) $(TOOLS)/gojq $(SEMCONVGEN)
+tools: $(GOLANGCI_LINT) $(MISSPELL) $(STRINGER) $(TOOLS)/gojq $(SEMCONVGEN)
 
 
 # Build
