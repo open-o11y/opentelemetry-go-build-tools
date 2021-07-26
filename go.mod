@@ -1,3 +1,3 @@
 module go.opentelemetry.io/build-tools
 
-go 1.15
+go 1.16
