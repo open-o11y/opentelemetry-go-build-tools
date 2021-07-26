@@ -105,7 +105,7 @@ func getDependencies(modVersioning common.ModuleVersioning) (dependencyMap, erro
 // one module set, unless it is excluded.
 func (v verification) verifyAllModulesInSet() error {
 	for modPath, modFilePath := range v.ModuleVersioning.ModPathMap {
-		if _, exists := v.ModInfoMap[modPath]; !exists {
+		if _, exists := v.ModuleVersioning.ModInfoMap[modPath]; !exists {
 			return &errModuleNotInSet{
 				modPath:     modPath,
 				modFilePath: modFilePath,
