@@ -38,7 +38,7 @@ updates:
       interval: weekly
   -
     package-ecosystem: gomod
-    directory: /semconvgen
+    directory: /releaser
     labels:
       - dependencies
       - go
