@@ -24,9 +24,9 @@ import (
 )
 
 var (
-	allModuleSets bool
+	allModuleSets  bool
 	moduleSetNames []string
-	skipMake bool
+	skipGoModTidy  bool
 )
 
 // prereleaseCmd represents the prerelease command
@@ -56,7 +56,7 @@ var prereleaseCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Using versioning file", versioningFile)
 
-		prerelease.Run(versioningFile, moduleSetNames, allModuleSets, skipMake)
+		prerelease.Run(versioningFile, moduleSetNames, allModuleSets, skipGoModTidy)
 	},
 }
 
@@ -79,7 +79,7 @@ func init() {
 	if err := prereleaseCmd.MarkFlagRequired("module-set-names"); err != nil {
 		log.Fatalf("could not mark module-set-names flag as required: %v", err)
 	}
-	prereleaseCmd.Flags().BoolVarP(&skipMake, "skip-make", "s", false,
+	prereleaseCmd.Flags().BoolVarP(&skipGoModTidy, "skip-go-mod-tidy", "s", false,
 		"Specify this flag to skip the 'make lint' and 'make ci' steps. "+
 			"To be used for debugging purposes. Should not be skipped during actual release.",
 	)
