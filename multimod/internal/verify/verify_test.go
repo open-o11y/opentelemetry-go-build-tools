@@ -34,10 +34,10 @@ var (
 )
 
 // TestMain performs setup for the tests and suppress printing logs.
-func TestMain(m *testing.M) {
-	log.SetOutput(ioutil.Discard)
-	os.Exit(m.Run())
-}
+//func TestMain(m *testing.M) {
+//	log.SetOutput(ioutil.Discard)
+//	os.Exit(m.Run())
+//}
 
 func captureOutput(f func()) string {
 	var buf bytes.Buffer
@@ -51,7 +51,10 @@ func captureOutput(f func()) string {
 }
 
 func TestNewVerification(t *testing.T) {
-	tmpRootDir, err := os.MkdirTemp(testDataDir, "NewVerification")
+	testName := "new_verification"
+	versionYamlDir := filepath.Join(testDataDir, testName)
+
+	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
 	if err != nil {
 		t.Fatal("creating temp dir:", err)
 	}
@@ -61,9 +64,9 @@ func TestNewVerification(t *testing.T) {
 	modFiles := map[string][]byte{
 		filepath.Join(tmpRootDir, "test", "test1", "go.mod"): []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n\n" +
 			"require (\n\t\"go.opentelemetry.io/testroot/v2\" v2.0.0\n)\n"),
-		filepath.Join(tmpRootDir, "test", "go.mod"):          []byte("module go.opentelemetry.io/test3\n\ngo 1.16\n"),
-		filepath.Join(tmpRootDir, "go.mod"):                  []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
-		filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+		filepath.Join(tmpRootDir, "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+		filepath.Join(tmpRootDir, "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+		filepath.Join(tmpRootDir, "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
 	if err := commontest.WriteGoModFiles(modFiles); err != nil {
@@ -81,7 +84,7 @@ func TestNewVerification(t *testing.T) {
 	}{
 		{
 			name:               "valid versioning",
-			versioningFilename: filepath.Join(testDataDir, "new_verification/versions_valid.yaml"),
+			versioningFilename: filepath.Join(versionYamlDir, "versions_valid.yaml"),
 			repoRoot:           tmpRootDir,
 			shouldError:        false,
 			expectedModuleSetMap: common.ModuleSetMap{
@@ -89,19 +92,24 @@ func TestNewVerification(t *testing.T) {
 					Version: "v1.2.3-RC1+meta",
 					Modules: []common.ModulePath{
 						"go.opentelemetry.io/test/test1",
-						"go.opentelemetry.io/test/test2",
 					},
 				},
 				"mod-set-2": common.ModuleSet{
 					Version: "v0.1.0",
 					Modules: []common.ModulePath{
-						"go.opentelemetry.io/test3",
+						"go.opentelemetry.io/test2",
+					},
+				},
+				"mod-set-3": common.ModuleSet{
+					Version: "v2.2.2",
+					Modules: []common.ModulePath{
+						"go.opentelemetry.io/testroot/v2",
 					},
 				},
 			},
 			expectedModulePathMap: common.ModulePathMap{
 				"go.opentelemetry.io/test/test1":  common.ModuleFilePath(filepath.Join(tmpRootDir, "test", "test1", "go.mod")),
-				"go.opentelemetry.io/test3":       common.ModuleFilePath(filepath.Join(tmpRootDir, "test", "go.mod")),
+				"go.opentelemetry.io/test2":       common.ModuleFilePath(filepath.Join(tmpRootDir, "test", "go.mod")),
 				"go.opentelemetry.io/testroot/v2": common.ModuleFilePath(filepath.Join(tmpRootDir, "go.mod")),
 			},
 			expectedModuleInfoMap: common.ModuleInfoMap{
@@ -109,19 +117,19 @@ func TestNewVerification(t *testing.T) {
 					ModuleSetName: "mod-set-1",
 					Version:       "v1.2.3-RC1+meta",
 				},
-				"go.opentelemetry.io/test/test2": common.ModuleInfo{
-					ModuleSetName: "mod-set-1",
-					Version:       "v1.2.3-RC1+meta",
-				},
-				"go.opentelemetry.io/test3": common.ModuleInfo{
+				"go.opentelemetry.io/test2": common.ModuleInfo{
 					ModuleSetName: "mod-set-2",
 					Version:       "v0.1.0",
+				},
+				"go.opentelemetry.io/testroot/v2": common.ModuleInfo{
+					ModuleSetName: "mod-set-3",
+					Version:       "v2.2.2",
 				},
 			},
 		},
 		{
 			name:                  "invalid version file syntax",
-			versioningFilename:    filepath.Join(testDataDir, "new_verification/versions_invalid_syntax.yaml"),
+			versioningFilename:    filepath.Join(versionYamlDir, "versions_invalid_syntax.yaml"),
 			repoRoot:              tmpRootDir,
 			shouldError:           true,
 			expectedModuleSetMap:  nil,
@@ -149,7 +157,11 @@ func TestNewVerification(t *testing.T) {
 
 // Positive-only test
 func TestGetDependencies(t *testing.T) {
-	tmpRootDir, err := os.MkdirTemp(testDataDir, "GetDependencies")
+	testName := "get_dependencies"
+
+	versionYamlDir := filepath.Join(testDataDir, testName)
+
+	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
 	if err != nil {
 		t.Fatal("creating temp dir:", err)
 	}
@@ -188,8 +200,8 @@ func TestGetDependencies(t *testing.T) {
 	if err := commontest.WriteGoModFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
-	modVersioning, _ := common.NewModuleVersioning(
-		filepath.Join(testDataDir, "get_dependencies/versions_valid.yaml"),
+	v, _ := newVerification(
+		filepath.Join(versionYamlDir, "versions_valid.yaml"),
 		tmpRootDir,
 	)
 
@@ -214,7 +226,7 @@ func TestGetDependencies(t *testing.T) {
 		},
 	}
 
-	actual, err := getDependencies(modVersioning)
+	actual, err := v.getDependencies()
 
 	require.NoError(t, err)
 	require.Equal(t, len(expected), len(actual))
@@ -226,295 +238,171 @@ func TestGetDependencies(t *testing.T) {
 	}
 }
 
-//func TestVerifyAllModulesInSet(t *testing.T) {
-//	testCases := []struct {
-//		name          string
-//		modFiles      map[string][]byte
-//		expectedError error
-//	}{
-//		{
-//			name: "valid",
-//
-//			modFiles: map[string][]byte{
-//				filepath.Join(tmpRootDir, "test", "test1", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1\n\n" +
-//					"go 1.16\n\n" +
-//					"require (\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2 v1.2.3-RC1+meta\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test3 v0.1.0\n" +
-//					")"),
-//				filepath.Join(tmpRootDir, "test", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test3\n\n" +
-//					"go 1.16\n\n" +
-//					"require (\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2 v1.2.3-RC1+meta\n\n" +
-//					")"),
-//				filepath.Join(tmpRootDir, "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/testroot\n\n" +
-//					"go 1.16\n\n" +
-//					"require (\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2 v1.2.3-RC1+meta\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test3 v0.1.0\n" +
-//					")"),
-//				filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2\n\n" +
-//					"go 1.16\n\n" +
-//					"require (\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/test3 v0.1.0\n\t" +
-//					"go.opentelemetry.io/build-tools/multimod/internal/verify/testroot v0.2.0\n" +
-//					")"),
-//			},
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "v1.2.3-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//							"go.opentelemetry.io/test/test2",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//					"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: nil,
-//		},
-//		{
-//			name: "module not listed",
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "v1.2.3-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//					"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: &errModuleNotInSet{
-//				modPath:     "go.opentelemetry.io/test/test2",
-//				modFilePath: "root/path/to/mod/test/test2/go.mod",
-//			},
-//		},
-//		{
-//			name: "module not in repo",
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "v1.2.3-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//							"go.opentelemetry.io/test/test2",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: &errModuleNotInRepo{
-//				modPath:    "go.opentelemetry.io/test3",
-//				modSetName: "mod-set-2",
-//			},
-//		},
-//	}
-//
-//	for _, tc := range testCases {
-//		t.Run(tc.name, func(t *testing.T) {
-//			tmpRootDir, err := os.MkdirTemp(testDataDir, "GetDependencies")
-//			if err != nil {
-//				t.Fatal("creating temp dir:", err)
-//			}
-//
-//			defer os.RemoveAll(tmpRootDir)
-//
-//			modFiles := tc.modFiles
-//
-//			if err := commontest.WriteGoModFiles(modFiles); err != nil {
-//				t.Fatal("could not create go mod file tree", err)
-//			}
-//			modVersioning, _ := common.NewModuleVersioning(
-//				filepath.Join(testDataDir, "get_dependencies/versions_valid.yaml"),
-//				tmpRootDir,
-//			)
-//			actual := tc.v.verifyAllModulesInSet()
-//
-//			assert.Equal(t, tc.expectedError, actual)
-//		})
-//	}
-//}
+func TestVerifyAllModulesInSet(t *testing.T) {
+	testName := "verify_all_modules_in_set"
+	versionYamlDir := filepath.Join(testDataDir, testName)
 
-//func TestVerifyVersions(t *testing.T) {
-//	testCases := []struct {
-//		name          string
-//		v             verification
-//		expectedError error
-//	}{
-//		{
-//			name: "valid",
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "v1.2.3-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//							"go.opentelemetry.io/test/test2",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//					"mod-set-3": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test4",
-//						},
-//					},
-//					"mod-set-4": common.ModuleSet{
-//						Version: "v2.2.2-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test5",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//					"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//					"go.opentelemetry.io/test4":      "root/test4/go.mod",
-//					"go.opentelemetry.io/test5":      "root/test5/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: nil,
-//		},
-//		{
-//			name: "invalid version",
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "invalid-version-v.02.0.",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//							"go.opentelemetry.io/test/test2",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//					"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: &errInvalidVersion{
-//				modSetName:    "mod-set-1",
-//				modSetVersion: "invalid-version-v.02.0.",
-//			},
-//		},
-//		{
-//			name: "multiple sets with same major version",
-//			v: MockVerification(
-//				common.ModuleSetMap{
-//					"mod-set-1": common.ModuleSet{
-//						Version: "v1.2.3-RC1+meta",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test/test1",
-//							"go.opentelemetry.io/test/test2",
-//						},
-//					},
-//					"mod-set-2": common.ModuleSet{
-//						Version: "v0.1.0",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test3",
-//						},
-//					},
-//					"mod-set-3": common.ModuleSet{
-//						Version: "v1.1.0-duplicatedmajor",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test4",
-//						},
-//					},
-//					"mod-set-4": common.ModuleSet{
-//						Version: "v1.9.0-anotherduplicatedmajor",
-//						Modules: []common.ModulePath{
-//							"go.opentelemetry.io/test5",
-//						},
-//					},
-//				},
-//				common.ModulePathMap{
-//					"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//					"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//					"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//					"go.opentelemetry.io/test4":      "root/test4/go.mod",
-//					"go.opentelemetry.io/test5":      "root/test5/go.mod",
-//				},
-//				dependencyMap{},
-//			),
-//			expectedError: &errMultipleSetSameVersion{
-//				modSetNames:   []string{"mod-set-1", "mod-set-3", "mod-set-4"},
-//				modSetVersion: "v1",
-//			},
-//		},
-//	}
-//
-//	for _, tc := range testCases {
-//		t.Run(tc.name, func(t *testing.T) {
-//			actual := tc.v.verifyVersions()
-//			if tc.expectedError != nil {
-//				// Check if expectedError is of type errMultipleSetSameVersion
-//				if expectedErr, ok := tc.expectedError.(*errMultipleSetSameVersion); ok {
-//					actualErr, ok := actual.(*errMultipleSetSameVersion)
-//					assert.True(t, ok)
-//					assert.IsType(t, expectedErr, actualErr)
-//
-//					// compare that modSetNames elements match (order should not matter)
-//					assert.ElementsMatch(t, expectedErr.modSetNames, actualErr.modSetNames)
-//				}
-//			} else {
-//				assert.Equal(t, tc.expectedError, actual)
-//			}
-//		})
-//	}
-//}
+	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
+	if err != nil {
+		t.Fatal("creating temp dir:", err)
+	}
+
+	defer os.RemoveAll(tmpRootDir)
+
+	testCases := []struct {
+		name               string
+		versioningFilename string
+		repoRoot           string
+		modFiles           map[string][]byte
+		expectedError      error
+	}{
+		{
+			name:               "valid",
+			versioningFilename: filepath.Join(versionYamlDir, "versions_valid.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "valid"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "valid", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: nil,
+		},
+		{
+			name:               "module not listed",
+			versioningFilename: filepath.Join(versionYamlDir, "module_not_listed.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "not_listed"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "not_listed", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "not_listed", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "not_listed", "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "not_listed", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: &errModuleNotInSet{
+				modPath:     "go.opentelemetry.io/testroot/v2",
+				modFilePath: common.ModuleFilePath(filepath.Join(tmpRootDir, "not_listed", "go.mod")),
+			},
+		},
+		{
+			name:               "module not in repo",
+			versioningFilename: filepath.Join(versionYamlDir, "module_not_in_repo.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "not_in_repo"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "not_in_repo", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "not_in_repo", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "not_in_repo", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: &errModuleNotInRepo{
+				modPath:    "go.opentelemetry.io/testroot/v2",
+				modSetName: "mod-set-3",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := commontest.WriteGoModFiles(tc.modFiles); err != nil {
+				t.Fatal("could not create go mod file tree", err)
+			}
+
+			v, err := newVerification(tc.versioningFilename, tc.repoRoot)
+			require.NoError(t, err)
+
+			actual := v.verifyAllModulesInSet()
+
+			assert.Equal(t, tc.expectedError, actual)
+		})
+	}
+}
+
+func TestVerifyVersions(t *testing.T) {
+	testName := "verify_versions"
+	versionYamlDir := filepath.Join(testDataDir, testName)
+
+	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
+	if err != nil {
+		t.Fatal("creating temp dir:", err)
+	}
+
+	defer os.RemoveAll(tmpRootDir)
+
+	testCases := []struct {
+		name               string
+		versioningFilename string
+		repoRoot           string
+		modFiles           map[string][]byte
+		expectedError      error
+	}{
+		{
+			name:               "valid",
+			versioningFilename: filepath.Join(versionYamlDir, "versions_valid.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "valid"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "valid", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "valid", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: nil,
+		},
+		{
+			name:               "invalid version",
+			versioningFilename: filepath.Join(versionYamlDir, "invalid_version.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "invalid_version"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "invalid_version", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "invalid_version", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "invalid_version", "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "invalid_version", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: &errInvalidVersion{
+				modSetName:    "mod-set-1",
+				modSetVersion: "invalid-version-v.02.0.",
+			},
+		},
+		{
+			name:               "multiple sets with same major version",
+			versioningFilename: filepath.Join(versionYamlDir, "multiple_sets_same_major.yaml"),
+			repoRoot:           filepath.Join(tmpRootDir, "multiple_sets_same_major"),
+			modFiles: map[string][]byte{
+				filepath.Join(tmpRootDir, "multiple_sets_same_major", "test", "test1", "go.mod"):    []byte("module \"go.opentelemetry.io/test/test1\"\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "multiple_sets_same_major", "test", "go.mod"):             []byte("module go.opentelemetry.io/test2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "multiple_sets_same_major", "go.mod"):                     []byte("module go.opentelemetry.io/testroot/v2\n\ngo 1.16\n"),
+				filepath.Join(tmpRootDir, "multiple_sets_same_major", "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
+			},
+			expectedError: &errMultipleSetSameVersion{
+				modSetNames:   []string{"mod-set-1", "mod-set-3", "mod-set-4"},
+				modSetVersion: "v1",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := commontest.WriteGoModFiles(tc.modFiles); err != nil {
+				t.Fatal("could not create go mod file tree", err)
+			}
+
+			v, err := newVerification(tc.versioningFilename, tc.repoRoot)
+			require.NoError(t, err)
+
+			actual := v.verifyVersions()
+			if tc.expectedError != nil {
+				// Check if expectedError is of type errMultipleSetSameVersion
+				if expectedErr, ok := tc.expectedError.(*errMultipleSetSameVersion); ok {
+					actualErr, ok := actual.(*errMultipleSetSameVersion)
+					assert.True(t, ok)
+					assert.IsType(t, expectedErr, actualErr)
+
+					// compare that modSetNames elements match (order should not matter)
+					assert.ElementsMatch(t, expectedErr.modSetNames, actualErr.modSetNames)
+				}
+			} else {
+				assert.Equal(t, tc.expectedError, actual)
+			}
+		})
+	}
+}
 
 //func TestVerifyDependencies(t *testing.T) {
 //	testCases := []struct {
