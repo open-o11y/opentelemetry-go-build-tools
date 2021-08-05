@@ -22,7 +22,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 
 	tools "go.opentelemetry.io/build-tools"
-	"go.opentelemetry.io/build-tools/releaser/internal/common"
+	"go.opentelemetry.io/build-tools/multimod/internal/common"
 )
 
 func Run(versioningFile, moduleSetName, commitHash string, deleteModuleSetTags bool) {

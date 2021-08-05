@@ -43,3 +43,25 @@ func TestIsStableVersion(t *testing.T) {
 		assert.Equal(t, tc.Expected, actual)
 	}
 }
+
+func TestFilePathToRegex(t *testing.T) {
+	testCases := []struct {
+		fpath    string
+		expected string
+	}{
+		{
+			fpath:    "go.opentelemetry.io/test/test1",
+			expected: `go\.opentelemetry\.io\/test\/test1`,
+		},
+		{
+			fpath:    "go.opentelemetry.io/test/hyphen-test1",
+			expected: `go\.opentelemetry\.io\/test\/hyphen-test1`,
+		},
+	}
+
+	for _, tc := range testCases {
+		actual := filePathToRegex(tc.fpath)
+
+		assert.Equal(t, tc.expected, actual)
+	}
+}
