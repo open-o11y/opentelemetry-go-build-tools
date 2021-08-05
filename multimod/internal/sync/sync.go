@@ -132,19 +132,6 @@ func (s sync) updateAllGoModFiles() error {
 	return nil
 }
 
-func (s sync) commitChangesToNewBranch(repo *git.Repository) error {
-	branchNameElements := []string{"sync", s.OtherModuleSetRelease.ModSetName, s.OtherModuleSetRelease.ModSetVersion()}
-	branchName := strings.Join(branchNameElements, "_")
-
-	commitMessage := fmt.Sprintf(
-		"Sync repo to use %v with version %v",
-		s.OtherModuleSetRelease.ModSetName,
-		s.OtherModuleSetRelease.ModSetVersion(),
-	)
-
-	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)
-}
-
 func (s sync) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
 	worktree, err := common.GetWorktree(repo)
 	if err != nil {
@@ -161,4 +148,17 @@ func (s sync) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
 	} else {
 		return false, nil
 	}
+}
+
+func (s sync) commitChangesToNewBranch(repo *git.Repository) error {
+	branchNameElements := []string{"sync", s.OtherModuleSetRelease.ModSetName, s.OtherModuleSetRelease.ModSetVersion()}
+	branchName := strings.Join(branchNameElements, "_")
+
+	commitMessage := fmt.Sprintf(
+		"Sync repo to use %v with version %v",
+		s.OtherModuleSetRelease.ModSetName,
+		s.OtherModuleSetRelease.ModSetVersion(),
+	)
+
+	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)
 }

@@ -114,6 +114,21 @@ func newPrerelease(versioningFilename, modSetToUpdate, repoRoot string) (prerele
 	}, nil
 }
 
+func (p prerelease) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
+	err := p.ModuleSetRelease.CheckGitTagsAlreadyExist(repo)
+
+	switch err.(type) {
+	case *common.ErrGitTagsAlreadyExist:
+		return true, nil
+	case nil:
+		return false, nil
+	case *common.ErrInconsistentGitTagsExist:
+		return false, fmt.Errorf("cannot proceed with inconsistently tagged module set %v: %v", p.ModuleSetRelease.ModSetName, err)
+	default:
+		return false, fmt.Errorf("unhandled error: %v", err)
+	}
+}
+
 // updateAllVersionGo updates the version.go file containing a hardcoded semver version string
 // for modules within a set, if the file exists.
 func (p prerelease) updateAllVersionGo() error {
@@ -139,7 +154,7 @@ func (p prerelease) updateAllVersionGo() error {
 }
 
 // updateVersionGoFile updates one version.go file.
-// TODO: use the ast package rather than regex to ensure that the string is correctly replaced.
+// TODO: a potential improvement is to use AST-related packages rather than regex to perform replacement.
 func updateVersionGoFile(filePath string, newVersion string) error {
 	if !strings.HasSuffix(filePath, "version.go") {
 		return fmt.Errorf("cannot update file passed that does not end with version.go")
@@ -200,19 +215,4 @@ func (p prerelease) commitChangesToNewBranch(repo *git.Repository) error {
 	)
 
 	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)
-}
-
-func (p prerelease) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
-	err := p.ModuleSetRelease.CheckGitTagsAlreadyExist(repo)
-
-	switch err.(type) {
-	case *common.ErrGitTagsAlreadyExist:
-		return true, nil
-	case nil:
-		return false, nil
-	case *common.ErrInconsistentGitTagsExist:
-		return false, fmt.Errorf("cannot proceed with inconsistently tagged module set %v: %v", p.ModuleSetRelease.ModSetName, err)
-	default:
-		return false, fmt.Errorf("unhandled error: %v", err)
-	}
 }

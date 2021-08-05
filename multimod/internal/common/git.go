@@ -21,6 +21,7 @@ import (
 	"log"
 )
 
+// CommitChangesToNewBranch creates a new branch, commits to it, and returns to the original worktree.
 func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git.Repository) error {
 	// save reference to current head in storage
 	origRef, err := repo.Head()
@@ -32,7 +33,7 @@ func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git
 		return fmt.Errorf("could not store original head ref")
 	}
 
-	if _, err = CheckoutNewGitBranch(branchName, repo); err != nil {
+	if _, err = checkoutNewBranch(branchName, repo); err != nil {
 		return fmt.Errorf("createPrereleaseBranch failed: %v", err)
 	}
 
@@ -41,7 +42,7 @@ func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git
 	}
 
 	// return to original branch
-	err = CheckoutExistingGitBranch(origRef.Name(), repo)
+	err = checkoutExistingBranch(origRef.Name(), repo)
 	if err != nil {
 		log.Fatal("unable to checkout original branch")
 	}
@@ -72,7 +73,7 @@ func commitChanges(commitMessage string, repo *git.Repository) error {
 	return nil
 }
 
-func CheckoutExistingGitBranch(branchRefName plumbing.ReferenceName, repo *git.Repository) error {
+func checkoutExistingBranch(branchRefName plumbing.ReferenceName, repo *git.Repository) error {
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return &errGetWorktreeFailed{reason: err}
@@ -92,7 +93,7 @@ func CheckoutExistingGitBranch(branchRefName plumbing.ReferenceName, repo *git.R
 	return nil
 }
 
-func CheckoutNewGitBranch(branchName string, repo *git.Repository) (plumbing.ReferenceName, error) {
+func checkoutNewBranch(branchName string, repo *git.Repository) (plumbing.ReferenceName, error) {
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return "", &errGetWorktreeFailed{reason: err}
@@ -114,6 +115,7 @@ func CheckoutNewGitBranch(branchName string, repo *git.Repository) (plumbing.Ref
 	return branchRefName, nil
 }
 
+// GetWorktree returns the worktree of a repo.
 func GetWorktree(repo *git.Repository) (*git.Worktree, error) {
 	worktree, err := repo.Worktree()
 	if err != nil {

@@ -13,3 +13,19 @@
 // limitations under the License.
 
 package sync
+
+func TestNewSync(t *testing.T) {
+
+}
+
+func TestUpdateAllGoModFiles(t *testing.T) {
+
+}
+
+func TestCheckModuleSetUpToDate(t *testing.T) {
+
+}
+
+func TestCommitChangesToNewBranch(t *testing.T) {
+
+}

@@ -101,6 +101,7 @@ func filePathToRegex(fpath string) string {
 	return replacedSlashes
 }
 
+// RunGoModTidy takes a ModulePathMap and runs "go mod tidy" at each module file path.
 func RunGoModTidy(modPathMap ModulePathMap) error {
 	return nil
 }

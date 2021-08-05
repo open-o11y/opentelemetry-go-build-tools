@@ -44,6 +44,18 @@ func TestIsStableVersion(t *testing.T) {
 	}
 }
 
+//func TestGetAllModuleSetNames(t *testing.T) {
+//
+//}
+//
+//func TestUpdateGoModVersions(t *testing.T) {
+//
+//}
+//
+//func TestUpdateGoModFiles(t *testing.T) {
+//
+//}
+
 func TestFilePathToRegex(t *testing.T) {
 	testCases := []struct {
 		fpath    string
@@ -65,3 +77,7 @@ func TestFilePathToRegex(t *testing.T) {
 		assert.Equal(t, tc.expected, actual)
 	}
 }
+
+//func TestRunGoModTidy(t *testing.T) {
+//
+//}

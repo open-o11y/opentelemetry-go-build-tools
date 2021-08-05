@@ -27,54 +27,6 @@ import (
 const (
 	testDataDir = "./test_data"
 )
-//
-//func TestMockModuleVersioning(t *testing.T) {
-//	modSetMap := common.ModuleSetMap{
-//		"mod-set-1": common.ModuleSet{
-//			Version: "v1.2.3-RC1+meta",
-//			Modules: []common.ModulePath{
-//				"go.opentelemetry.io/test/test1",
-//				"go.opentelemetry.io/test/test2",
-//			},
-//		},
-//		"mod-set-2": common.ModuleSet{
-//			Version: "v0.1.0",
-//			Modules: []common.ModulePath{
-//				"go.opentelemetry.io/test3",
-//			},
-//		},
-//	}
-//
-//	modPathMap := common.ModulePathMap{
-//		"go.opentelemetry.io/test/test1": "root/path/to/mod/test/test1/go.mod",
-//		"go.opentelemetry.io/test/test2": "root/path/to/mod/test/test2/go.mod",
-//		"go.opentelemetry.io/test3":      "root/test3/go.mod",
-//	}
-//
-//	expected := common.ModuleVersioning{
-//		ModSetMap:  modSetMap,
-//		ModPathMap: modPathMap,
-//		ModInfoMap: common.ModuleInfoMap{
-//			"go.opentelemetry.io/test/test1": common.ModuleInfo{
-//				ModuleSetName: "mod-set-1",
-//				Version:       "v1.2.3-RC1+meta",
-//			},
-//			"go.opentelemetry.io/test/test2": common.ModuleInfo{
-//				ModuleSetName: "mod-set-1",
-//				Version:       "v1.2.3-RC1+meta",
-//			},
-//			"go.opentelemetry.io/test3": common.ModuleInfo{
-//				ModuleSetName: "mod-set-2",
-//				Version:       "v0.1.0",
-//			},
-//		},
-//	}
-//
-//	actual, err := MockModuleVersioning(modSetMap, modPathMap)
-//
-//	require.NoError(t, err)
-//	assert.Equal(t, expected, actual)
-//}
 
 func TestWriteGoModFiles(t *testing.T) {
 	tmpRootDir, err := os.MkdirTemp(testDataDir, "WriteGoModFiles")

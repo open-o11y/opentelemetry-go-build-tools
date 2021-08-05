@@ -12,32 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prerelease
-
-import (
-	"testing"
-)
-
-func TestNewPrerelease(t *testing.T) {
-
-}
-
-func TestCheckModuleSetUpToDate(t *testing.T) {
-
-}
-
-func TestUpdateVersionGoFile(t *testing.T) {
-
-}
-
-func TestUpdateAllVersionGo(t *testing.T) {
-
-}
+package common
 
 func TestCommitChangesToNewBranch(t *testing.T) {
 
 }
 
-func TestUpdateAllGoModFiles(t *testing.T) {
+func TestCheckoutExistingGitBranch(t *testing.T) {
+
+}
+
+func TestCheckoutNewGitBranch(t *testing.T) {
+
+}
+
+func TestVerifyWorkingTreeClean(t *testing.T) {
 
 }
