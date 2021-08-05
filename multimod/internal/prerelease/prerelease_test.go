@@ -16,9 +16,9 @@ package prerelease
 
 import (
 	//"log"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	//"testing"
+	//
+	//"github.com/stretchr/testify/assert"
 
 	//"go.opentelemetry.io/build-tools/multimod/internal/common"
 	//"go.opentelemetry.io/build-tools/multimod/internal/common/commontest"
