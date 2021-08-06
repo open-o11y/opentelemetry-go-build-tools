@@ -14,6 +14,10 @@
 
 package common
 
+import (
+	"testing"
+)
+
 func TestCommitChangesToNewBranch(t *testing.T) {
 
 }

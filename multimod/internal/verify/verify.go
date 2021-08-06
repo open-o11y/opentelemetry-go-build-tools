@@ -150,12 +150,19 @@ func (v verification) verifyVersions() error {
 	}
 
 	// Check that no more than one module exists for any given non-zero major version
+	var versionErrors []*errMultipleSetSameVersion
 	for majorVersion, modSetNames := range setMajorVersions {
 		if len(modSetNames) > 1 {
-			return &errMultipleSetSameVersion{
+			versionErrors = append(versionErrors, &errMultipleSetSameVersion{
 				modSetNames:   modSetNames,
 				modSetVersion: majorVersion,
-			}
+			})
+		}
+	}
+
+	if len(versionErrors) > 0 {
+		return &errMultipleSetSameVersionSlice{
+			errs: versionErrors,
 		}
 	}
 

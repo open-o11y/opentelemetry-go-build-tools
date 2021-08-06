@@ -49,7 +49,7 @@ func (e *errInvalidVersion) Error() string {
 }
 
 type errMultipleSetSameVersionSlice struct {
-	errs []errMultipleSetSameVersion
+	errs []*errMultipleSetSameVersion
 }
 
 func (e *errMultipleSetSameVersionSlice) Error() string {
