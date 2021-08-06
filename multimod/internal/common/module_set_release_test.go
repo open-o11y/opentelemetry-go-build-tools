@@ -42,7 +42,7 @@ func TestNewModuleSetRelease(t *testing.T) {
 		filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 
@@ -112,7 +112,7 @@ func TestNewModuleSetRelease(t *testing.T) {
 			expectedTagNames: map[string][]ModuleTagName{
 				"mod-set-1": []ModuleTagName{"test/test1"},
 				"mod-set-2": []ModuleTagName{"test"},
-				"mod-set-3": []ModuleTagName{repoRootTag},
+				"mod-set-3": []ModuleTagName{RepoRootTag},
 			},
 			expectedFullTagNames: map[string][]string{
 				"mod-set-1": []string{"test/test1/v1.2.3-RC1+meta"},
@@ -153,15 +153,15 @@ func TestNewModuleSetRelease(t *testing.T) {
 					require.NoError(t, err)
 				}
 
-				assert.IsType(t, ModuleVersioning{}, actual.ModuleVersioning)
-				assert.Equal(t, tc.expectedModuleSetMap, actual.ModuleVersioning.ModSetMap)
-				assert.Equal(t, tc.expectedModulePathMap, actual.ModuleVersioning.ModPathMap)
-				assert.Equal(t, tc.expectedModuleInfoMap, actual.ModuleVersioning.ModInfoMap)
-
 				assert.IsType(t, ModuleSetRelease{}, actual)
 				assert.Equal(t, tc.expectedTagNames[expectedModSetName], actual.TagNames)
 				assert.Equal(t, expectedModSet, actual.ModSet)
 				assert.Equal(t, expectedModSetName, actual.ModSetName)
+
+				assert.IsType(t, ModuleVersioning{}, actual.ModuleVersioning)
+				assert.Equal(t, tc.expectedModuleSetMap, actual.ModuleVersioning.ModSetMap)
+				assert.Equal(t, tc.expectedModulePathMap, actual.ModuleVersioning.ModPathMap)
+				assert.Equal(t, tc.expectedModuleInfoMap, actual.ModuleVersioning.ModInfoMap)
 
 				// property functions
 				assert.Equal(t, tc.expectedFullTagNames[expectedModSetName], actual.ModuleFullTagNames())
@@ -190,7 +190,7 @@ func TestVerifyGitTagsDoNotAlreadyExist(t *testing.T) {
 		filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 

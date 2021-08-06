@@ -83,7 +83,7 @@ func TestNewSync(t *testing.T) {
 			")"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 
@@ -331,7 +331,7 @@ func TestUpdateAllGoModFiles(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.modSetName, func(t *testing.T) {
-			if err := commontest.WriteGoModFiles(modFiles); err != nil {
+			if err := commontest.WriteTempFiles(modFiles); err != nil {
 				t.Fatal("could not create go mod file tree", err)
 			}
 

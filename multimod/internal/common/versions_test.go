@@ -341,7 +341,7 @@ func TestBuildModulePathMap(t *testing.T) {
 		filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 

@@ -69,7 +69,7 @@ func TestNewVerification(t *testing.T) {
 		filepath.Join(tmpRootDir, "test", "excluded", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 
@@ -197,7 +197,7 @@ func TestGetDependencies(t *testing.T) {
 			")"),
 	}
 
-	if err := commontest.WriteGoModFiles(modFiles); err != nil {
+	if err := commontest.WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 	v, _ := newVerification(
@@ -301,7 +301,7 @@ func TestVerifyAllModulesInSet(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := commontest.WriteGoModFiles(tc.modFiles); err != nil {
+			if err := commontest.WriteTempFiles(tc.modFiles); err != nil {
 				t.Fatal("could not create go mod file tree", err)
 			}
 
@@ -387,7 +387,7 @@ func TestVerifyVersions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := commontest.WriteGoModFiles(tc.modFiles); err != nil {
+			if err := commontest.WriteTempFiles(tc.modFiles); err != nil {
 				t.Fatal("could not create go mod file tree", err)
 			}
 
@@ -523,7 +523,7 @@ func TestVerifyDependencies(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := commontest.WriteGoModFiles(tc.modFiles); err != nil {
+			if err := commontest.WriteTempFiles(tc.modFiles); err != nil {
 				t.Fatal("could not create go mod file tree", err)
 			}
 

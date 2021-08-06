@@ -22,9 +22,8 @@ import (
 	"testing"
 )
 
-// WriteGoModFiles is a helper function to dynamically write go.mod files used for testing.
-// This func is duplicated from the commontest package to avoid a cyclic dependency.
-func WriteGoModFiles(modFiles map[string][]byte) error {
+// WriteTempFiles is a helper function to dynamically write files such as go.mod or version.go used for testing.
+func WriteTempFiles(modFiles map[string][]byte) error {
 	perm := os.FileMode(0700)
 
 	for modFilePath, file := range modFiles {
@@ -35,7 +34,7 @@ func WriteGoModFiles(modFiles map[string][]byte) error {
 		}
 
 		if err := ioutil.WriteFile(modFilePath, file, perm); err != nil {
-			return fmt.Errorf("could not write temporary mod file %v", err)
+			return fmt.Errorf("could not write temporary file %v", err)
 		}
 	}
 

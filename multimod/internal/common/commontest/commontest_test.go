@@ -29,7 +29,7 @@ const (
 )
 
 func TestWriteGoModFiles(t *testing.T) {
-	tmpRootDir, err := os.MkdirTemp(testDataDir, "WriteGoModFiles")
+	tmpRootDir, err := os.MkdirTemp(testDataDir, "WriteTempFiles")
 	if err != nil {
 		t.Fatal("creating temp dir:", err)
 	}
@@ -44,7 +44,7 @@ func TestWriteGoModFiles(t *testing.T) {
 		filepath.Join(tmpRootDir, "test", "test2", "go.mod"): []byte("module \"go.opentelemetry.io/test/testexcluded\"\n\ngo 1.16\n"),
 	}
 
-	if err := WriteGoModFiles(modFiles); err != nil {
+	if err := WriteTempFiles(modFiles); err != nil {
 		t.Fatal("could not create go mod file tree", err)
 	}
 
