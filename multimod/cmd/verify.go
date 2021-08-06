@@ -23,11 +23,6 @@ import (
 	"go.opentelemetry.io/build-tools/multimod/internal/verify"
 )
 
-const (
-	defaultVersionsConfigName = "versions"
-	defaultVersionsConfigType = "yaml"
-)
-
 // verifyCmd represents the verify command
 var verifyCmd = &cobra.Command{
 	Use:   "verify",

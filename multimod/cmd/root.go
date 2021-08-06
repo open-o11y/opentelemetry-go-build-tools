@@ -27,6 +27,11 @@ var (
 	versioningFile string
 )
 
+const (
+	defaultVersionsConfigName = "versions"
+	defaultVersionsConfigType = "yaml"
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "versions",
