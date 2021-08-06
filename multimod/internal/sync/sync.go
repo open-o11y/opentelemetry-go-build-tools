@@ -49,7 +49,7 @@ func Run(myVersioningFile string, otherVersioningFile string, otherRepoRoot stri
 	}
 
 	for _, moduleSetName := range otherModuleSetNames {
-		s, err := newSync(myVersioningFile, otherVersioningFile, moduleSetName, myRepoRoot, otherRepoRoot)
+		s, err := newSync(myVersioningFile, otherVersioningFile, moduleSetName, myRepoRoot)
 		if err != nil {
 			log.Fatal("Error creating new sync struct:", err)
 		}
@@ -60,7 +60,7 @@ func Run(myVersioningFile string, otherVersioningFile string, otherRepoRoot stri
 			log.Fatal("updateAllGoModFiles failed:", err)
 		}
 
-		modSetUpToDate, err := s.checkModuleSetUpToDate(repo)
+		modSetUpToDate, err := checkModuleSetUpToDate(repo)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -94,21 +94,26 @@ Then, if necessary, commit changes and push to upstream/make a pull request.`)
 
 // sync holds fields needed to update one module set at a time.
 type sync struct {
-	OtherModuleSetRelease common.ModuleSetRelease
-	MyModuleVersioning    common.ModuleVersioning
+	OtherModuleSetName string
+	OtherModuleSet     common.ModuleSet
+	MyModuleVersioning common.ModuleVersioning
 }
 
-func newSync(myVersioningFilename, otherVersioningFilename, modSetToUpdate, myRepoRoot string, otherRepoRoot string) (sync, error) {
-	otherModRelease, err := common.NewModuleSetRelease(otherVersioningFilename, modSetToUpdate, otherRepoRoot)
+func newSync(myVersioningFilename, otherVersioningFilename, modSetToUpdate, myRepoRoot string) (sync, error) {
+	otherModuleSet, err := common.GetModuleSet(modSetToUpdate, otherVersioningFilename)
 	if err != nil {
 		return sync{}, fmt.Errorf("error creating new sync struct: %v", err)
 	}
 
 	myModVersioning, err := common.NewModuleVersioning(myVersioningFilename, myRepoRoot)
+	if err != nil {
+		return sync{}, fmt.Errorf("could not get my ModuleVersioning: %v", err)
+	}
 
 	return sync{
-		OtherModuleSetRelease: otherModRelease,
-		MyModuleVersioning:    myModVersioning,
+		OtherModuleSetName: modSetToUpdate,
+		OtherModuleSet:     otherModuleSet,
+		MyModuleVersioning: myModVersioning,
 	}, nil
 }
 
@@ -123,8 +128,8 @@ func (s sync) updateAllGoModFiles() error {
 
 	if err := common.UpdateGoModFiles(
 		modFilePaths,
-		s.OtherModuleSetRelease.ModSetPaths(),
-		s.OtherModuleSetRelease.ModSetVersion(),
+		s.OtherModuleSet.Modules,
+		s.OtherModuleSet.Version,
 	); err != nil {
 		return fmt.Errorf("could not update all go mod files: %v", err)
 	}
@@ -132,7 +137,7 @@ func (s sync) updateAllGoModFiles() error {
 	return nil
 }
 
-func (s sync) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
+func checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
 	worktree, err := common.GetWorktree(repo)
 	if err != nil {
 		return false, err
@@ -151,13 +156,13 @@ func (s sync) checkModuleSetUpToDate(repo *git.Repository) (bool, error) {
 }
 
 func (s sync) commitChangesToNewBranch(repo *git.Repository) error {
-	branchNameElements := []string{"sync", s.OtherModuleSetRelease.ModSetName, s.OtherModuleSetRelease.ModSetVersion()}
+	branchNameElements := []string{"sync", s.OtherModuleSetName, s.OtherModuleSet.Version}
 	branchName := strings.Join(branchNameElements, "_")
 
 	commitMessage := fmt.Sprintf(
 		"Sync repo to use %v with version %v",
-		s.OtherModuleSetRelease.ModSetName,
-		s.OtherModuleSetRelease.ModSetVersion(),
+		s.OtherModuleSetName,
+		s.OtherModuleSet.Version,
 	)
 
 	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)

@@ -99,6 +99,16 @@ func readVersioningFile(versioningFilename string) (versionConfig, error) {
 	return versionCfg, nil
 }
 
+// GetModuleSet returns the ModuleSet specified from the versioning file.
+func GetModuleSet(modSetName string, versioningFilename string) (ModuleSet, error) {
+	versionCfg, err := readVersioningFile(versioningFilename)
+	if err != nil {
+		return ModuleSet{}, err
+	}
+
+	return versionCfg.ModuleSets[modSetName], nil
+}
+
 // buildModuleSetsMap creates a map with module set names as keys and ModuleSet structs as values.
 func (versionCfg versionConfig) buildModuleSetsMap() (ModuleSetMap, error) {
 	return versionCfg.ModuleSets, nil

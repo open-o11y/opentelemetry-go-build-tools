@@ -441,6 +441,11 @@ func TestVerifyDependencies(t *testing.T) {
 					"require (\n\t" +
 					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2 v1.2.3-RC1+meta\n" +
 					")"),
+				filepath.Join(tmpRootDir, "valid", "test", "test2", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2\n\n" +
+					"go 1.16\n\n" +
+					"require (\n\t" +
+					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n" +
+					")"),
 				filepath.Join(tmpRootDir, "valid", "test", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test3\n\n" +
 					"go 1.16\n\n" +
 					"require (\n\t" +
@@ -453,11 +458,6 @@ func TestVerifyDependencies(t *testing.T) {
 					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n\t" +
 					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2 v1.2.3-RC1+meta\n\t" +
 					"go.opentelemetry.io/build-tools/multimod/internal/verify/test3 v0.1.0\n" +
-					")"),
-				filepath.Join(tmpRootDir, "valid", "test", "test2", "go.mod"): []byte("module go.opentelemetry.io/build-tools/multimod/internal/verify/test/test2\n\n" +
-					"go 1.16\n\n" +
-					"require (\n\t" +
-					"go.opentelemetry.io/build-tools/multimod/internal/verify/test/test1 v1.2.3-RC1+meta\n" +
 					")"),
 			},
 			expectWarnings: false,
