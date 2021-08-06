@@ -28,7 +28,7 @@ const (
 	testDataDir = "./test_data"
 )
 
-func TestWriteGoModFiles(t *testing.T) {
+func TestWriteTempFiles(t *testing.T) {
 	tmpRootDir, err := os.MkdirTemp(testDataDir, "WriteTempFiles")
 	if err != nil {
 		t.Fatal("creating temp dir:", err)
