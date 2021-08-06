@@ -40,10 +40,10 @@ func TestMain(m *testing.M) {
 
 func TestNewSync(t *testing.T) {
 	testName := "new_sync"
-	versionYamlDir := filepath.Join(testDataDir, testName)
+	versionsYamlDir := filepath.Join(testDataDir, testName)
 
-	myVersioningFilename := filepath.Join(versionYamlDir, "versions_valid.yaml")
-	otherVersioningFilename := filepath.Join(versionYamlDir, "other_versions_valid.yaml")
+	myVersioningFilename := filepath.Join(versionsYamlDir, "versions_valid.yaml")
+	otherVersioningFilename := filepath.Join(versionsYamlDir, "other_versions_valid.yaml")
 
 	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
 	if err != nil {
@@ -181,10 +181,10 @@ func TestNewSync(t *testing.T) {
 
 func TestUpdateAllGoModFiles(t *testing.T) {
 	testName := "update_all_go_mod_files"
-	versionYamlDir := filepath.Join(testDataDir, testName)
+	versionsYamlDir := filepath.Join(testDataDir, testName)
 
-	myVersioningFilename := filepath.Join(versionYamlDir, "versions_valid.yaml")
-	otherVersioningFilename := filepath.Join(versionYamlDir, "other_versions_valid.yaml")
+	myVersioningFilename := filepath.Join(versionsYamlDir, "versions_valid.yaml")
+	otherVersioningFilename := filepath.Join(versionsYamlDir, "other_versions_valid.yaml")
 
 	tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
 	if err != nil {
