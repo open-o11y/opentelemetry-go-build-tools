@@ -47,9 +47,9 @@ func GetAllModuleSetNames(versioningFile string, repoRoot string) ([]string, err
 	return modSetNames, nil
 }
 
-// UpdateGoModVersions updates one go.mod file, given by modFilePath, by updating all modules listed in
+// updateGoModVersions updates one go.mod file, given by modFilePath, by updating all modules listed in
 // newModPaths to use the newVersion given.
-func UpdateGoModVersions(modFilePath ModuleFilePath, newModPaths []ModulePath, newVersion string) error {
+func updateGoModVersions(modFilePath ModuleFilePath, newModPaths []ModulePath, newVersion string) error {
 	if !strings.HasSuffix(string(modFilePath), "go.mod") {
 		return fmt.Errorf("cannot update file passed that does not end with go.mod")
 	}
@@ -84,7 +84,7 @@ func UpdateGoModVersions(modFilePath ModuleFilePath, newModPaths []ModulePath, n
 func UpdateGoModFiles(modFilePaths []ModuleFilePath, newModPaths []ModulePath, newVersion string) error {
 	log.Println("Updating all module versions in go.mod files...")
 	for _, modFilePath := range modFilePaths {
-		if err := UpdateGoModVersions(
+		if err := updateGoModVersions(
 			modFilePath,
 			newModPaths,
 			newVersion,

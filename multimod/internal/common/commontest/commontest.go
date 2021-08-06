@@ -42,6 +42,8 @@ func WriteGoModFiles(modFiles map[string][]byte) error {
 	return nil
 }
 
+// RemoveAll attempts to remove a directory and all nested subdirectories,
+// taking in a testing instance and providing a Fatal to stop tests if failed.
 func RemoveAll(t *testing.T, dir string) {
 	err := os.RemoveAll(dir)
 	if err != nil {

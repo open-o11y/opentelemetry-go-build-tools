@@ -57,6 +57,7 @@ type verification struct {
 	common.ModuleVersioning
 }
 
+// dependencyMap keeps track of all modules' dependencies.
 type dependencyMap map[common.ModulePath][]common.ModulePath
 
 func newVerification(versioningFilename, repoRoot string) (verification, error) {
