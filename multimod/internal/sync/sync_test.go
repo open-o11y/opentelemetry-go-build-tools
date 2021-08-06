@@ -322,7 +322,7 @@ func TestUpdateAllGoModFiles(t *testing.T) {
 					"go 1.16\n\n" +
 					"require (\n\t" +
 					"go.opentelemetry.io/build-tools/multimod/internal/sync/test/test1 v1.2.3-RC1+meta\n\t" +
-					"go.opentelemetry.io/build-tools/multimod/internal/sync/test/test2 v1.2.3-RC1+meta\n" +
+					"go.opentelemetry.io/build-tools/multimod/internal/sync/test/test2 v1.2.3-RC1+meta\n\t" +
 					"go.opentelemetry.io/other/test/test1 v1.0.0-old\n\t" +
 					")"),
 			},
