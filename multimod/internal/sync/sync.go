@@ -51,7 +51,7 @@ func Run(myVersioningFile string, otherVersioningFile string, otherRepoRoot stri
 	for _, moduleSetName := range otherModuleSetNames {
 		s, err := newSync(myVersioningFile, otherVersioningFile, moduleSetName, myRepoRoot)
 		if err != nil {
-			log.Fatal("Error creating new sync struct:", err)
+			log.Fatal("error creating new sync struct:", err)
 		}
 
 		log.Printf("===== Module Set: %v =====\n", moduleSetName)
@@ -165,5 +165,11 @@ func (s sync) commitChangesToNewBranch(repo *git.Repository) error {
 		s.OtherModuleSet.Version,
 	)
 
-	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	if err != nil {
+		return err
+	}
+	log.Printf("Commit successful. Hash of commit: %s\n", hash)
+
+	return nil
 }

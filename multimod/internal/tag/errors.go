@@ -29,3 +29,20 @@ type errGitTagsNotOnCommit struct {
 func (e *errGitTagsNotOnCommit) Error() string {
 	return fmt.Sprintf("some git tags are not on commit %s:\n%s", e.commitHash, strings.Join(e.tagNames, "\n"))
 }
+
+type errCouldNotGetCommitHash struct {
+	err error
+}
+
+func (e *errCouldNotGetCommitHash) Error() string {
+	return fmt.Sprintf("error getting full hash: %v", e.err)
+}
+
+type errCouldNotDeleteTag struct {
+	modFullTag string
+	err        error
+}
+
+func (e *errCouldNotDeleteTag) Error() string {
+	return fmt.Sprintf("could not delete tag %v: %v", e.modFullTag, e.err)
+}

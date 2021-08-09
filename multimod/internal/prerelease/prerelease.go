@@ -214,5 +214,11 @@ func (p prerelease) commitChangesToNewBranch(repo *git.Repository) error {
 		p.ModuleSetRelease.ModSetVersion(),
 	)
 
-	return common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	if err != nil {
+		return err
+	}
+	log.Printf("Commit successful. Hash of commit: %s\n", hash)
+
+	return err
 }

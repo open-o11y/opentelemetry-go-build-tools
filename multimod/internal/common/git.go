@@ -22,23 +22,24 @@ import (
 )
 
 // CommitChangesToNewBranch creates a new branch, commits to it, and returns to the original worktree.
-func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git.Repository) error {
+func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git.Repository) (plumbing.Hash, error) {
 	// save reference to current head in storage
 	origRef, err := repo.Head()
 	if err != nil {
-		return fmt.Errorf("could not get repo head: %v", err)
+		return plumbing.ZeroHash, fmt.Errorf("could not get repo head: %v", err)
 	}
 
 	if err = repo.Storer.SetReference(origRef); err != nil {
-		return fmt.Errorf("could not store original head ref")
+		return plumbing.ZeroHash, fmt.Errorf("could not store original head ref")
 	}
 
 	if _, err = checkoutNewBranch(branchName, repo); err != nil {
-		return fmt.Errorf("createPrereleaseBranch failed: %v", err)
+		return plumbing.ZeroHash, fmt.Errorf("createPrereleaseBranch failed: %v", err)
 	}
 
-	if err = commitChanges(commitMessage, repo); err != nil {
-		return fmt.Errorf("could not commit changes: %v", err)
+	hash, err := commitChanges(commitMessage, repo)
+	if err != nil {
+		return plumbing.ZeroHash, fmt.Errorf("could not commit changes: %v", err)
 	}
 
 	// return to original branch
@@ -47,16 +48,16 @@ func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git
 		log.Fatal("unable to checkout original branch")
 	}
 
-	return err
+	return hash, err
 }
 
-func commitChanges(commitMessage string, repo *git.Repository) error {
+func commitChanges(commitMessage string, repo *git.Repository) (plumbing.Hash, error) {
 	// commit changes to git
 	log.Printf("Committing changes to git with message '%v'\n", commitMessage)
 
 	worktree, err := GetWorktree(repo)
 	if err != nil {
-		return err
+		return plumbing.ZeroHash, err
 	}
 
 	commitOptions := &git.CommitOptions{
@@ -65,12 +66,10 @@ func commitChanges(commitMessage string, repo *git.Repository) error {
 
 	hash, err := worktree.Commit(commitMessage, commitOptions)
 	if err != nil {
-		return fmt.Errorf("could not commit changes to git: %v", err)
+		return plumbing.ZeroHash, fmt.Errorf("could not commit changes to git: %v", err)
 	}
 
-	log.Printf("Commit successful. Hash of commit: %s\n", hash)
-
-	return nil
+	return hash, nil
 }
 
 func checkoutExistingBranch(branchRefName plumbing.ReferenceName, repo *git.Repository) error {

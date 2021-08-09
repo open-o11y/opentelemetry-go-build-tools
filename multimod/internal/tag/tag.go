@@ -62,7 +62,7 @@ type tagger struct {
 func newTagger(versioningFilename, modSetToUpdate, repoRoot, hash string, deleteModuleSetTags bool) (tagger, error) {
 	modRelease, err := common.NewModuleSetRelease(versioningFilename, modSetToUpdate, repoRoot)
 	if err != nil {
-		return tagger{}, fmt.Errorf("error creating prerelease struct: %v", err)
+		return tagger{}, fmt.Errorf("error creating tagger struct: %v", err)
 	}
 
 	repo, err := git.PlainOpen(repoRoot)
@@ -117,7 +117,7 @@ func verifyTagsOnCommit(modFullTagNames []string, repo *git.Repository, targetCo
 			}
 
 		case git.ErrTagNotFound:
-			continue
+			tagsNotOnCommit = append(tagsNotOnCommit, tagName)
 		default:
 			return fmt.Errorf("unable to fetch git tag ref for %v: %v", tagName, tagRefErr)
 		}
@@ -136,7 +136,7 @@ func verifyTagsOnCommit(modFullTagNames []string, repo *git.Repository, targetCo
 func getFullCommitHash(hash string, repo *git.Repository) (plumbing.Hash, error) {
 	fullHash, err := repo.ResolveRevision(plumbing.Revision(hash))
 	if err != nil {
-		return plumbing.ZeroHash, fmt.Errorf("error getting full hash: %v", err)
+		return plumbing.ZeroHash, &errCouldNotGetCommitHash{err}
 	}
 
 	return *fullHash, nil
@@ -145,7 +145,7 @@ func getFullCommitHash(hash string, repo *git.Repository) (plumbing.Hash, error)
 func (t tagger) deleteModuleSetTags() error {
 	modFullTagsToDelete := t.ModuleSetRelease.ModuleFullTagNames()
 
-	if err := t.deleteTags(modFullTagsToDelete); err != nil {
+	if err := deleteTags(modFullTagsToDelete, t.Repo); err != nil {
 		return fmt.Errorf("unable to delete module tags: %v", err)
 	}
 
@@ -154,12 +154,12 @@ func (t tagger) deleteModuleSetTags() error {
 
 // deleteTags removes the tags created for a certain version. This func is called to remove newly
 // created tags if the new module tagging fails.
-func (t tagger) deleteTags(modFullTags []string) error {
+func deleteTags(modFullTags []string, repo *git.Repository) error {
 	for _, modFullTag := range modFullTags {
 		log.Printf("Deleting tag %v\n", modFullTag)
 
-		if err := t.Repo.DeleteTag(modFullTag); err != nil {
-			return fmt.Errorf("could not delete tag %v: %v", modFullTag, err)
+		if err := repo.DeleteTag(modFullTag); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -186,7 +186,7 @@ func (t tagger) tagAllModules() error {
 			log.Println("error creating a tag, removing all newly created tags...")
 
 			// remove newly created tags to prevent inconsistencies
-			if delTagsErr := t.deleteTags(addedFullTags); delTagsErr != nil {
+			if delTagsErr := deleteTags(addedFullTags, t.Repo); delTagsErr != nil {
 				return fmt.Errorf("git tag failed for %v: %v\n"+
 					"During handling of the above error, failed to not remove all tags: %v",
 					newFullTag, err, delTagsErr,
