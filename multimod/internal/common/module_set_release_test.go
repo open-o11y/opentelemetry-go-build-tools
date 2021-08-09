@@ -18,8 +18,10 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -208,7 +210,13 @@ func TestVerifyGitTagsDoNotAlreadyExist(t *testing.T) {
 		t.Fatal("could not get repo worktree:", err)
 	}
 
-	commitHash, err := worktree.Commit("test commit", &git.CommitOptions{})
+	commitHash, err := worktree.Commit("test commit", &git.CommitOptions{
+		Author: &object.Signature{
+			Name: "test_author",
+			Email: "test_email",
+			When: time.Now(),
+		},
+	})
 	if err != nil {
 		t.Fatal("could not commit to worktree:", err)
 	}

@@ -16,12 +16,15 @@ package commontest
 
 import (
 	"fmt"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 // WriteTempFiles is a helper function to dynamically write files such as go.mod or version.go used for testing.
@@ -63,14 +66,16 @@ func InitNewRepoWithCommit(repoRoot string) (*git.Repository, plumbing.Hash, err
 	if err != nil {
 		return nil, plumbing.ZeroHash, err
 	}
-
-	commitOptions := &git.CommitOptions{
-		All: true,
-	}
-
 	commitMessage := "test commit"
 
-	commitHash, err := worktree.Commit(commitMessage, commitOptions)
+	commitHash, err := worktree.Commit(commitMessage, &git.CommitOptions{
+		All: true,
+		Author: &object.Signature{
+			Name: "test_author",
+			Email: "test_email",
+			When: time.Now(),
+		},
+	})
 	if err != nil {
 		return nil, plumbing.ZeroHash, fmt.Errorf("could not commit changes to git: %v", err)
 	}
