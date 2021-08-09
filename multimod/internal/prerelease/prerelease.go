@@ -82,7 +82,9 @@ func Run(versioningFile string, moduleSetNames []string, allModuleSets bool, ski
 		if skipModTidy {
 			log.Println("Skipping go mod tidy...")
 		} else {
-			common.RunGoModTidy(p.ModuleVersioning.ModPathMap)
+			if err = common.RunGoModTidy(p.ModuleVersioning.ModPathMap); err != nil {
+				log.Fatal("could not run Go Mod Tidy")
+			}
 		}
 
 		if err = p.commitChangesToNewBranch(repo); err != nil {

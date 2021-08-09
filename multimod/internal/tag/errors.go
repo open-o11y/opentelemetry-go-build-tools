@@ -37,12 +37,3 @@ type errCouldNotGetCommitHash struct {
 func (e *errCouldNotGetCommitHash) Error() string {
 	return fmt.Sprintf("error getting full hash: %v", e.err)
 }
-
-type errCouldNotDeleteTag struct {
-	modFullTag string
-	err        error
-}
-
-func (e *errCouldNotDeleteTag) Error() string {
-	return fmt.Sprintf("could not delete tag %v: %v", e.modFullTag, e.err)
-}

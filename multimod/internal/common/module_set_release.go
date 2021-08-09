@@ -125,6 +125,4 @@ func (modRelease ModuleSetRelease) CheckGitTagsAlreadyExist(repo *git.Repository
 			tagNames: existingGitTagNames,
 		}
 	}
-
-	return nil
 }
