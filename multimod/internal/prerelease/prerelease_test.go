@@ -423,7 +423,7 @@ func TestUpdateAllGoModFiles(t *testing.T) {
 		t.Run(tc.modSetName, func(t *testing.T) {
 			versioningFilename := filepath.Join(versionsYamlDir, "versions_valid.yaml")
 
-			tmpRootDir, err := os.MkdirTemp(testDataDir, testName)
+			tmpRootDir, err := os.MkdirTemp(testDataDir, testName+tc.modSetName)
 			if err != nil {
 				t.Fatal("creating temp dir:", err)
 			}

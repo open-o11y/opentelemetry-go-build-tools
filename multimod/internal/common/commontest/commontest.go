@@ -27,6 +27,14 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
+var (
+	TestAuthor = &object.Signature{
+		Name: "test_author",
+		Email: "test_email",
+		When: time.Now(),
+	}
+)
+
 // WriteTempFiles is a helper function to dynamically write files such as go.mod or version.go used for testing.
 func WriteTempFiles(modFiles map[string][]byte) error {
 	perm := os.FileMode(0700)
@@ -70,11 +78,7 @@ func InitNewRepoWithCommit(repoRoot string) (*git.Repository, plumbing.Hash, err
 
 	commitHash, err := worktree.Commit(commitMessage, &git.CommitOptions{
 		All: true,
-		Author: &object.Signature{
-			Name: "test_author",
-			Email: "test_email",
-			When: time.Now(),
-		},
+		Author: TestAuthor,
 	})
 	if err != nil {
 		return nil, plumbing.ZeroHash, fmt.Errorf("could not commit changes to git: %v", err)

@@ -16,13 +16,15 @@ package common
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"log"
+	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 // CommitChangesToNewBranch creates a new branch, commits to it, and returns to the original worktree.
-func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git.Repository) (plumbing.Hash, error) {
+func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git.Repository, customAuthor *object.Signature) (plumbing.Hash, error) {
 	// save reference to current head in storage
 	origRef, err := repo.Head()
 	if err != nil {
@@ -37,7 +39,7 @@ func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git
 		return plumbing.ZeroHash, fmt.Errorf("createPrereleaseBranch failed: %v", err)
 	}
 
-	hash, err := commitChanges(commitMessage, repo)
+	hash, err := commitChanges(commitMessage, repo, customAuthor)
 	if err != nil {
 		return plumbing.ZeroHash, fmt.Errorf("could not commit changes: %v", err)
 	}
@@ -51,7 +53,7 @@ func CommitChangesToNewBranch(branchName string, commitMessage string, repo *git
 	return hash, err
 }
 
-func commitChanges(commitMessage string, repo *git.Repository) (plumbing.Hash, error) {
+func commitChanges(commitMessage string, repo *git.Repository, customAuthor *object.Signature) (plumbing.Hash, error) {
 	// commit changes to git
 	log.Printf("Committing changes to git with message '%v'\n", commitMessage)
 
@@ -60,8 +62,16 @@ func commitChanges(commitMessage string, repo *git.Repository) (plumbing.Hash, e
 		return plumbing.ZeroHash, err
 	}
 
-	commitOptions := &git.CommitOptions{
-		All: true,
+	var commitOptions *git.CommitOptions
+	if customAuthor == nil {
+		commitOptions = &git.CommitOptions{
+			All: true,
+		}
+	} else {
+		commitOptions = &git.CommitOptions{
+			All: true,
+			Author: customAuthor,
+		}
 	}
 
 	hash, err := worktree.Commit(commitMessage, commitOptions)

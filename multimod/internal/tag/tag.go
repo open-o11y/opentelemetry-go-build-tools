@@ -16,6 +16,7 @@ package tag
 
 import (
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"log"
 
 	"github.com/go-git/go-git/v5"
@@ -47,7 +48,7 @@ func Run(versioningFile, moduleSetName, commitHash string, deleteModuleSetTags b
 
 		fmt.Println("Successfully deleted module tags")
 	} else {
-		if err := t.tagAllModules(); err != nil {
+		if err := t.tagAllModules(nil); err != nil {
 			log.Fatalf("unable to tag modules: %v", err)
 		}
 	}
@@ -165,7 +166,7 @@ func deleteTags(modFullTags []string, repo *git.Repository) error {
 	return nil
 }
 
-func (t tagger) tagAllModules() error {
+func (t tagger) tagAllModules(customTagger *object.Signature) error {
 	modFullTags := t.ModuleSetRelease.ModuleFullTagNames()
 
 	tagMessage := fmt.Sprintf("Module set %v, Version %v",
@@ -178,9 +179,17 @@ func (t tagger) tagAllModules() error {
 	for _, newFullTag := range modFullTags {
 		log.Printf("%v\n", newFullTag)
 
-		_, err := t.Repo.CreateTag(newFullTag, t.CommitHash, &git.CreateTagOptions{
-			Message: tagMessage,
-		})
+		var err error
+		if customTagger == nil {
+			_, err = t.Repo.CreateTag(newFullTag, t.CommitHash, &git.CreateTagOptions{
+				Message: tagMessage,
+			})
+		} else {
+			_, err = t.Repo.CreateTag(newFullTag, t.CommitHash, &git.CreateTagOptions{
+				Message: tagMessage,
+				Tagger:  customTagger,
+			})
+		}
 
 		if err != nil {
 			log.Println("error creating a tag, removing all newly created tags...")

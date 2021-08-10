@@ -54,7 +54,7 @@ func TestNewTagger(t *testing.T) {
 	repo, _, err := commontest.InitNewRepoWithCommit(tmpRootDir)
 	require.NoError(t, err)
 
-	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo)
+	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo, commontest.TestAuthor)
 	require.NoError(t, err)
 	hashPrefix := fullHash.String()[:8]
 
@@ -171,7 +171,7 @@ func TestVerifyTagsOnCommit(t *testing.T) {
 	repo, firstHash, err := commontest.InitNewRepoWithCommit(tmpRootDir)
 	require.NoError(t, err)
 
-	secondHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo)
+	secondHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo, commontest.TestAuthor)
 	require.NoError(t, err)
 
 	createTagOptions := &git.CreateTagOptions{
@@ -285,7 +285,7 @@ func TestGetFullCommitHash(t *testing.T) {
 	repo, _, err := commontest.InitNewRepoWithCommit(tmpRootDir)
 	require.NoError(t, err)
 
-	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo)
+	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo, commontest.TestAuthor)
 	require.NoError(t, err)
 	hashPrefix := fullHash.String()[:8]
 
@@ -345,7 +345,7 @@ func TestDeleteModuleSetTags(t *testing.T) {
 	repo, _, err := commontest.InitNewRepoWithCommit(tmpRootDir)
 	require.NoError(t, err)
 
-	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo)
+	fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo, commontest.TestAuthor)
 	require.NoError(t, err)
 	hashPrefix := fullHash.String()[:8]
 
@@ -593,7 +593,7 @@ func TestTagAllModules(t *testing.T) {
 			repo, _, err := commontest.InitNewRepoWithCommit(tmpRootDir)
 			require.NoError(t, err)
 
-			fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo)
+			fullHash, err := common.CommitChangesToNewBranch("test_commit", "commit used in a test", repo, commontest.TestAuthor)
 			require.NoError(t, err)
 			hashPrefix := fullHash.String()[:8]
 
@@ -623,7 +623,7 @@ func TestTagAllModules(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			err = tagger.tagAllModules()
+			err = tagger.tagAllModules(commontest.TestAuthor)
 			require.NoError(t, err)
 
 			for _, tagName := range tc.shouldExistTags {

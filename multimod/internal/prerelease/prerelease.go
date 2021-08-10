@@ -93,9 +93,7 @@ func Run(versioningFile string, moduleSetNames []string, allModuleSets bool, ski
 	}
 
 	log.Println(`=========
-Prerelease finished successfully. Now run the following to verify the changes:
-
-git diff main
+Prerelease finished successfully. Now checkout the new branch(es) and verify the changes.
 
 Then, if necessary, commit changes and push to upstream/make a pull request.`)
 }
@@ -216,7 +214,7 @@ func (p prerelease) commitChangesToNewBranch(repo *git.Repository) error {
 		p.ModuleSetRelease.ModSetVersion(),
 	)
 
-	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo, nil)
 	if err != nil {
 		return err
 	}

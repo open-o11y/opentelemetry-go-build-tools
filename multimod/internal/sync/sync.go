@@ -165,7 +165,7 @@ func (s sync) commitChangesToNewBranch(repo *git.Repository) error {
 		s.OtherModuleSet.Version,
 	)
 
-	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo)
+	hash, err := common.CommitChangesToNewBranch(branchName, commitMessage, repo, nil)
 	if err != nil {
 		return err
 	}

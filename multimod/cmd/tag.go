@@ -56,6 +56,14 @@ func init() {
 		log.Fatalf("could not mark commit-hash flag as required: %v", err)
 	}
 
+	tagCmd.Flags().StringVarP(&moduleSetName, "module-set-name", "m", "",
+		"Name of module set being tagged. " +
+			"Name must be listed in the module set versioning YAML. ",
+	)
+	if err := tagCmd.MarkFlagRequired("module-set-name"); err != nil {
+		log.Fatalf("could not mark module-set-name flag as required: %v", err)
+	}
+
 	tagCmd.Flags().BoolVarP(&deleteModuleSetTags, "delete-module-set-tags", "d", false,
 		"Specify this flag to delete all module tags associated with the version listed for the module set in the versioning file. Should only be used to undo recent tagging mistakes.",
 	)
