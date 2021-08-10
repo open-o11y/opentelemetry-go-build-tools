@@ -29,7 +29,7 @@ var (
 	otherRepoRoot string
 	allModuleSetsSync bool
 	moduleSetNamesSync []string
-	skipMakeSync bool
+	skipGoModTidySync bool
 )
 
 // syncCmd represents the sync command
@@ -45,7 +45,7 @@ var syncCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Using versioning file", versioningFile)
 
-		sync.Run(versioningFile, otherVersioningFile, otherRepoRoot, moduleSetNamesSync, allModuleSetsSync, skipMakeSync)
+		sync.Run(versioningFile, otherVersioningFile, otherRepoRoot, moduleSetNamesSync, allModuleSetsSync, skipGoModTidySync)
 	},
 }
 
@@ -81,7 +81,7 @@ func init() {
 		log.Fatalf("could not mark module-set-names flag as required: %v", err)
 	}
 
-	syncCmd.Flags().BoolVarP(&skipMakeSync, "skip-make", "s", false,
+	syncCmd.Flags().BoolVarP(&skipGoModTidySync, "skip-go-mod-tidy", "s", false,
 		"Specify this flag to skip the 'make lint' and 'make ci' steps. "+
 			"To be used for debugging purposes. Should not be skipped during actual release.",
 	)
