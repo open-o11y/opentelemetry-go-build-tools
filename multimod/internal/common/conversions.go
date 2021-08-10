@@ -25,7 +25,7 @@ func combineModuleTagNamesAndVersion(modTagNames []ModuleTagName, version string
 	var modFullTags []string
 	for _, modTagName := range modTagNames {
 		var newFullTag string
-		if modTagName == repoRootTag {
+		if modTagName == RepoRootTag {
 			newFullTag = version
 		} else {
 			newFullTag = string(modTagName) + "/" + version
@@ -80,7 +80,7 @@ func moduleFilePathToTagName(modFilePath ModuleFilePath, repoRoot string) (Modul
 
 	// if the modTagName is equal to go.mod, it is the root repo
 	if modTagName == "go.mod" {
-		return repoRootTag, nil
+		return RepoRootTag, nil
 	}
 
 	return ModuleTagName(modTagName), nil

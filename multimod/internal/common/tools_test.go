@@ -15,12 +15,9 @@
 package common
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestIsStableVersion(t *testing.T) {
@@ -47,29 +44,40 @@ func TestIsStableVersion(t *testing.T) {
 	}
 }
 
-func TestChangeToRepoRoot(t *testing.T) {
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal("finding working dir:", err)
+//func TestGetAllModuleSetNames(t *testing.T) {
+//
+//}
+//
+//func TestUpdateGoModVersions(t *testing.T) {
+//
+//}
+//
+//func TestUpdateGoModFiles(t *testing.T) {
+//
+//}
+
+func TestFilePathToRegex(t *testing.T) {
+	testCases := []struct {
+		fpath    string
+		expected string
+	}{
+		{
+			fpath:    "go.opentelemetry.io/test/test1",
+			expected: `go\.opentelemetry\.io\/test\/test1`,
+		},
+		{
+			fpath:    "go.opentelemetry.io/test/hyphen-test1",
+			expected: `go\.opentelemetry\.io\/test\/hyphen-test1`,
+		},
 	}
 
-	defer func(dir string) {
-		err := os.Chdir(dir)
-		if err != nil {
-			t.Fatal("error changing back to original dir:", err)
-		}
-	}(origDir)
+	for _, tc := range testCases {
+		actual := filePathToRegex(tc.fpath)
 
-	expected, _ := filepath.Abs("../../../")
-
-	actual, err := ChangeToRepoRoot()
-
-	require.NoError(t, err)
-	assert.Equal(t, expected, actual)
-
-	newDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal("could not get current working directory:", err)
+		assert.Equal(t, tc.expected, actual)
 	}
-	assert.Equal(t, expected, newDir)
 }
+
+//func TestRunGoModTidy(t *testing.T) {
+//
+//}

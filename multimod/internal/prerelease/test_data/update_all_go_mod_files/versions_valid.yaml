@@ -16,11 +16,15 @@ module-sets:
   mod-set-1:
     version: v1.2.3-RC1+meta
     modules:
-      - go.opentelemetry.io/test/test1
-      - go.opentelemetry.io/test/test2
+      - go.opentelemetry.io/build-tools/multimod/internal/prerelease/test/test1
+      - go.opentelemetry.io/build-tools/multimod/internal/prerelease/test/test2
   mod-set-2:
     version: v0.1.0
     modules:
-      - go.opentelemetry.io/test3
+      - go.opentelemetry.io/build-tools/multimod/internal/prerelease/test3
+  mod-set-3:
+    version: v0.2.0
+    modules:
+      - go.opentelemetry.io/build-tools/multimod/internal/prerelease/testroot
 excluded-modules:
-  - go.opentelemetry.io/excluded1
+  - go.opentelemetry.io/my/test/testexcluded
