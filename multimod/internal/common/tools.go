@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -103,5 +104,14 @@ func filePathToRegex(fpath string) string {
 
 // RunGoModTidy takes a ModulePathMap and runs "go mod tidy" at each module file path.
 func RunGoModTidy(modPathMap ModulePathMap) error {
+	for _, modFilePath := range modPathMap {
+		cmd := exec.Command("go", "version")
+		cmd.Dir = filepath.Dir(string(modFilePath))
+
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("go mod tidy failed: %v\n%v", out, err)
+		}
+	}
+
 	return nil
 }
