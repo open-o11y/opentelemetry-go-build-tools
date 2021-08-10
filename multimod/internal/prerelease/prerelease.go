@@ -83,7 +83,7 @@ func Run(versioningFile string, moduleSetNames []string, allModuleSets bool, ski
 			log.Println("Skipping go mod tidy...")
 		} else {
 			if err = common.RunGoModTidy(p.ModuleVersioning.ModPathMap); err != nil {
-				log.Fatal("could not run Go Mod Tidy")
+				log.Fatal("could not run Go Mod Tidy: ", err)
 			}
 		}
 
