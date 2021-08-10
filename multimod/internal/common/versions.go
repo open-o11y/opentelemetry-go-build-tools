@@ -25,111 +25,10 @@ import (
 )
 
 const (
-	repoRootTag = ModuleTagName("REPOROOTTAG")
-	SemverRegex = `\s+v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?`
+	RepoRootTag           = ModuleTagName("REPOROOTTAG")
+	SemverRegexNumberOnly = `(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?`
+	SemverRegex           = `v` + SemverRegexNumberOnly
 )
-
-// ModuleVersioning holds info about modules listed in a versioning file.
-type ModuleVersioning struct {
-	ModSetMap  ModuleSetMap
-	ModPathMap ModulePathMap
-	ModInfoMap ModuleInfoMap
-}
-
-// NewModuleVersioning returns a ModuleVersioning struct from a versioning file and repo root.
-func NewModuleVersioning(versioningFilename string, repoRoot string) (ModuleVersioning, error) {
-	vCfg, err := readVersioningFile(versioningFilename)
-	if err != nil {
-		return ModuleVersioning{}, fmt.Errorf("error reading versioning file %v: %v", versioningFilename, err)
-	}
-
-	modSetMap, err := vCfg.buildModuleSetsMap()
-	if err != nil {
-		return ModuleVersioning{}, fmt.Errorf("error building module set map for NewModuleVersioning: %v", err)
-	}
-
-	modInfoMap, err := vCfg.buildModuleMap()
-	if err != nil {
-		return ModuleVersioning{}, fmt.Errorf("error building module info map for NewModuleVersioning: %v", err)
-	}
-
-	modPathMap, err := vCfg.BuildModulePathMap(repoRoot)
-	if err != nil {
-		return ModuleVersioning{}, fmt.Errorf("error building module path map for NewModuleVersioning: %v", err)
-	}
-
-	return ModuleVersioning{
-		ModSetMap:  modSetMap,
-		ModPathMap: modPathMap,
-		ModInfoMap: modInfoMap,
-	}, nil
-}
-
-// ModuleSetRelease contains info about a specific set of modules in the versioning file to be updated.
-type ModuleSetRelease struct {
-	ModuleVersioning
-	ModSetName string
-	ModSet     ModuleSet
-	TagNames   []ModuleTagName
-}
-
-// NewModuleSetRelease returns a ModuleSetRelease struct by specifying a specific set of modules to update.
-func NewModuleSetRelease(versioningFilename, modSetToUpdate, repoRoot string) (ModuleSetRelease, error) {
-	modVersioning, err := NewModuleVersioning(versioningFilename, repoRoot)
-	if err != nil {
-		return ModuleSetRelease{}, fmt.Errorf("unable to load baseVersionStruct: %v", err)
-	}
-
-	// get new version and mod tags to update
-	modSet, exists := modVersioning.ModSetMap[modSetToUpdate]
-	if !exists {
-		return ModuleSetRelease{}, fmt.Errorf("could not find module set %v in versioning file", modSetToUpdate)
-	}
-
-	// get tag names of mods to update
-	tagNames, err := ModulePathsToTagNames(
-		modSet.Modules,
-		modVersioning.ModPathMap,
-		repoRoot,
-	)
-	if err != nil {
-		return ModuleSetRelease{}, fmt.Errorf("could not retrieve tag names from module paths: %v", err)
-	}
-
-	return ModuleSetRelease{
-		ModuleVersioning: modVersioning,
-		ModSetName:       modSetToUpdate,
-		ModSet:           modSet,
-		TagNames:         tagNames,
-	}, nil
-
-}
-
-// ModSetVersion gets the version of the module set to update.
-func (modRelease ModuleSetRelease) ModSetVersion() string {
-	return modRelease.ModSet.Version
-}
-
-// ModSetPaths gets the import paths of all modules in the module set to update.
-func (modRelease ModuleSetRelease) ModSetPaths() []ModulePath {
-	return modRelease.ModSet.Modules
-}
-
-// ModSetTagNames gets the tag names of all modules in the module set to update.
-func (modRelease ModuleSetRelease) ModSetTagNames() []ModuleTagName {
-	return modRelease.TagNames
-}
-
-// ModuleFullTagNames gets the full tag names (including the version) of all modules in the module set to update.
-func (modRelease ModuleSetRelease) ModuleFullTagNames() []string {
-	return combineModuleTagNamesAndVersion(modRelease.ModSetTagNames(), modRelease.ModSetVersion())
-}
-
-// versionConfig is needed to parse the versions.yaml file with viper.
-type versionConfig struct {
-	ModuleSets      ModuleSetMap `mapstructure:"module-sets"`
-	ExcludedModules []ModulePath `mapstructure:"excluded-modules"`
-}
 
 // excludedModules functions as a set containing all module paths that are excluded
 // from versioning.
@@ -168,6 +67,12 @@ type ModulePathMap map[ModulePath]ModuleFilePath
 // For example, the opentelemetry-go/sdk/metric/go.mod file will have a ModuleTagName "sdk/metric".
 type ModuleTagName string
 
+// versionConfig is needed to parse the versions.yaml file with viper.
+type versionConfig struct {
+	ModuleSets      ModuleSetMap `mapstructure:"module-sets"`
+	ExcludedModules []ModulePath `mapstructure:"excluded-modules"`
+}
+
 // readVersioningFile reads in a versioning file (typically given as versions.yaml) and returns
 // a versionConfig struct.
 func readVersioningFile(versioningFilename string) (versionConfig, error) {
@@ -192,6 +97,16 @@ func readVersioningFile(versioningFilename string) (versionConfig, error) {
 	}
 
 	return versionCfg, nil
+}
+
+// GetModuleSet returns the ModuleSet specified from the versioning file.
+func GetModuleSet(modSetName string, versioningFilename string) (ModuleSet, error) {
+	versionCfg, err := readVersioningFile(versioningFilename)
+	if err != nil {
+		return ModuleSet{}, err
+	}
+
+	return versionCfg.ModuleSets[modSetName], nil
 }
 
 // buildModuleSetsMap creates a map with module set names as keys and ModuleSet structs as values.
