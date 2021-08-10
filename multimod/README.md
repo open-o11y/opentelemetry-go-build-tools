@@ -61,7 +61,8 @@ the `verify` subcommand:
   * `verifyDependencies` checks if any stable modules depend on unstable
     modules.
     * The stability of a given module is defined by its version in the
-      `version.yaml` file (versions `v1` and above are stable, `v0` is unstable).
+      `version.yaml` file (versions `v1` and above are stable, `v0` is
+      unstable).
     * A dependency is defined by the "require" section of the module's `go.mod`
       file (in the current branch).
     * A warning will be printed for each dependency of a stable module on an
@@ -86,8 +87,8 @@ created and keeps local changes from your current branch.
         * **versioning-file (optional):** Path to versioning file that contains
           definitions of all module sets. If unspecified, defaults to
           (RepoRoot)/versions.yaml.
-        * **skip-go-mod-tidy (boolean flag):** Specify this flag to skip the 
-          'go mod tidy' step. To be used for debugging purposes. Should not be 
+        * **skip-go-mod-tidy (boolean flag):** Specify this flag to skip the 'go
+          mod tidy' step. To be used for debugging purposes. Should not be
           skipped during actual releases.
 
 2. Verify the changes.
@@ -99,7 +100,7 @@ created and keeps local changes from your current branch.
    This should have changed the version for all modules listed in `go.mod` files
    to be `<new version>`.
 
-   include the curated changes from the Changelog in the description.
+   include the curated changes from the Changelog in the description. For
    example, any linting steps would be done here.
 
 ## Tag the new release commit
