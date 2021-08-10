@@ -176,6 +176,7 @@ func TestVerifyTagsOnCommit(t *testing.T) {
 
 	createTagOptions := &git.CreateTagOptions{
 		Message: "test tag message",
+		Tagger: commontest.TestAuthor,
 	}
 
 	for _, tagName := range []string{
@@ -351,6 +352,7 @@ func TestDeleteModuleSetTags(t *testing.T) {
 
 	createTagOptions := &git.CreateTagOptions{
 		Message: "test tag message",
+		Tagger: commontest.TestAuthor,
 	}
 
 	tagNames := []string{
@@ -459,6 +461,7 @@ func TestDeleteTags(t *testing.T) {
 
 			createTagOptions := &git.CreateTagOptions{
 				Message: "test tag message",
+				Tagger: commontest.TestAuthor,
 			}
 
 			tagNames := []string{
@@ -510,6 +513,7 @@ func TestTagAllModules(t *testing.T) {
 
 	createTagOptions := &git.CreateTagOptions{
 		Message: "test tag message",
+		Tagger: commontest.TestAuthor,
 	}
 
 	tagNames := []string{

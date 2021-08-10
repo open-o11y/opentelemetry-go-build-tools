@@ -232,6 +232,7 @@ func TestVerifyGitTagsDoNotAlreadyExist(t *testing.T) {
 	} {
 		_, err = repo.CreateTag(tag, commitHash, &git.CreateTagOptions{
 			Message: tag,
+			Tagger: commontest.TestAuthor,
 		})
 		if err != nil {
 			t.Fatal("error creating tag:", err)
