@@ -16,6 +16,7 @@ package commontest
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,9 +25,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testDataDir = "./test_data"
+var (
+	testDataDir, _ = filepath.Abs("./test_data")
 )
+
+// TestMain performs setup for the tests and suppress printing logs.
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	os.Exit(m.Run())
+}
 
 func TestWriteTempFiles(t *testing.T) {
 	tmpRootDir, err := os.MkdirTemp(testDataDir, "WriteTempFiles")
