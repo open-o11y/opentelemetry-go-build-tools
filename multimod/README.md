@@ -74,8 +74,9 @@ Update `go.mod` for all modules to depend on the specified module set's new
 release using the prerelease subcommand. A new "prerelease" branch will be
 created and keeps local changes from your current branch.
 
-1. Run the pre-release script. It creates a branch `prerelease_<module set
-   name>_<new version>` that will contain all release changes.
+1. Run the pre-release script. It creates a branch
+   `prerelease_<module_set_name>_<new_version>` that will contain all release
+   changes.
 
     ```sh
     ./multimod prerelease --module-set-name <name>
