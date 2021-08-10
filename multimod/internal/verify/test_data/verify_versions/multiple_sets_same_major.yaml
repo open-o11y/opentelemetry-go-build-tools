@@ -22,8 +22,20 @@ module-sets:
     modules:
       - go.opentelemetry.io/test2
   mod-set-3:
-    version: v2.2.2
+    version: v1.0.0
     modules:
-      - go.opentelemetry.io/testroot/v2
+      - go.opentelemetry.io/test4
+  mod-set-4:
+    version: v1.9.9
+    modules:
+      - go.opentelemetry.io/test5
+  mod-set-5:
+    version: v2.1.2
+    modules:
+      - go.opentelemetry.io/test6
+  mod-set-6:
+    version: v2.1.2
+    modules:
+      - go.opentelemetry.io/test7
 excluded-modules:
   - go.opentelemetry.io/test/testexcluded

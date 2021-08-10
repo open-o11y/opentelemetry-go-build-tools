@@ -14,7 +14,7 @@
 
 module-sets:
   mod-set-1:
-    version: v1.2.3-RC1+meta
+    version: invalid-version-v.02.0.
     modules:
       - go.opentelemetry.io/test/test1
   mod-set-2:
